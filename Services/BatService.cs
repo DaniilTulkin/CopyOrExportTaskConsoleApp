@@ -15,7 +15,7 @@ namespace CopyOrExportTaskConsoleApp
             string destPath = IniService.ReadKey(Consts.NwcSettingsSection, Consts.NwcSettingsDestinationKey);
             string[] filesPaths = IniService.ReadSection(Consts.ExportFilesSection);
 
-            LogService.Initialize(log);
+            LogService.Initialize($"{Consts.ExportTask}_{log}");
             LogService.Info("ExportProjects started");
 
             if (!Directory.Exists(destPath)) Directory.CreateDirectory(destPath);
@@ -29,6 +29,7 @@ namespace CopyOrExportTaskConsoleApp
                         if (txtFilePath != null)
                         {
                             string batFilePath = CreateBatWithCommands(filePath, tempPath, taskRunnerFilePath, txtFilePath, destPath);
+                            LogService.Info($"Экспорт файла: {filePath}");
                             RunBatProcess(batFilePath);
 
                             FileService.DeleteByPath(txtFilePath, batFilePath, Path.Combine(tempPath, $"{Path.GetFileNameWithoutExtension(filePath)}.nwd"));
@@ -42,7 +43,7 @@ namespace CopyOrExportTaskConsoleApp
 
         private static void RunBatProcess(string batFilePath)
         {
-            string command = $"/c \"{batFilePath}\"";
+            string command = $"/B /c \"{batFilePath}\"";
             ProcessStartInfo processInfo = new ProcessStartInfo("cmd", command);
             processInfo.CreateNoWindow = true;
             processInfo.UseShellExecute = false;
@@ -51,13 +52,13 @@ namespace CopyOrExportTaskConsoleApp
 
             Process process = Process.Start(processInfo);
 
-            process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => 
-                { if (!string.IsNullOrEmpty(e.Data)) LogService.Info($"Console info: {e.Data}"); };
-            process.BeginOutputReadLine();
+            //process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => 
+            //    { if (!string.IsNullOrEmpty(e.Data)) LogService.Info($"Console info: {e.Data}"); };
+            //process.BeginOutputReadLine();
 
-            process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => 
-                { if (!string.IsNullOrEmpty(e.Data)) LogService.Error($"Console error: {e.Data}"); };
-            process.BeginErrorReadLine();
+            //process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => 
+            //    { if (!string.IsNullOrEmpty(e.Data)) LogService.Error($"Console error: {e.Data}"); };
+            //process.BeginErrorReadLine();
 
             process.WaitForExit();
             LogService.Info($"Process exit code: {process.ExitCode}");
@@ -71,7 +72,7 @@ namespace CopyOrExportTaskConsoleApp
                                                     string destPath)
         {
             string batFilePath = Path.Combine(tempPath, $"{Path.GetFileNameWithoutExtension(filePath)}.bat");
-            string command1 = $"start /wait \"Navisworks Batch Utility\" \"{taskRunnerFilePath}\" /i \"{txtFilePath}\" /od \"{tempPath}\"";
+            string command1 = $"start /B /wait \"Navisworks Batch Utility\" \"{taskRunnerFilePath}\" /i \"{txtFilePath}\" /od \"{tempPath}\" /lang ru-RU";
             string command2 = $"move /y \"{filePath.Replace("rvt", "nwc")}\" \"{destPath}\"";
             using (StreamWriter batFile = new StreamWriter(batFilePath))
             {

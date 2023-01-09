@@ -15,7 +15,7 @@ namespace CopyOrExportTaskConsoleApp
             string log = IniService.ReadKey(Consts.CopySettingsSection, Consts.CopySettingsLogKey);
             string[] filesPaths = IniService.ReadSection(Consts.CopyFilesSection);
 
-            LogService.Initialize(log);
+            LogService.Initialize($"{Consts.CopyTask}_{log}");
             LogService.Info("CopyFiles started");
 
             if (filesPaths != null)

@@ -33,15 +33,14 @@ namespace CopyOrExportTaskConsoleApp
             if (!Directory.Exists(logFolderPath)) Directory.CreateDirectory(logFolderPath);
             mutex.ReleaseMutex();
 
-            string dateStr = DateTime.Now.ToString("dd-MM-yyyy_HH-mm");
-            LogFilePath = Path.Combine(logFolderPath, $"{dateStr}_{logFileName}");
-
+            LogFilePath = logFileName;
             mutex.WaitOne();
             if (!File.Exists(LogFilePath)) File.Create(LogFilePath).Close();
             mutex.ReleaseMutex();
 
+            string dateStr = DateTime.Now.ToString("dd-MM-yyyy_HH-mm");
             List<string> startString = new List<string>();
-            startString.Add("====================================================================================");
+            startString.Add("\n====================================================================================");
             startString.Add($"{logFileName}_start_{dateStr}");
             startString.Add("====================================================================================");
             File.AppendAllLines(LogFilePath, startString);
